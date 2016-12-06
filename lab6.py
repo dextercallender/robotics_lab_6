@@ -1,7 +1,10 @@
 import math
 import sys
+import copy
 
 obstacles = []
+start = []
+goal = []
 
 class Obstacle:
     def __init__(self):
@@ -17,19 +20,8 @@ class Obstacle:
 
 def create_obstacles(input_file):
     ''' Create the obstacles and world dimensions from the specified input file '''
-    global start, end, obstacles, dimensions
+    global obstacles
     with open(input_file) as f:
-        # Start
-        str_start = f.readline().strip().split()
-        start = Obstacle()
-        start.vertices.append((float(str_start[0]), float(str_start[1])))
-        # End
-        str_end = f.readline().strip().split()
-        end = Obstacle()
-        end.vertices.append((float(str_end[0]), float(str_end[1])))
-        # World Dimensions
-        str_dim = f.readline().strip().split()
-        dimensions = (float(str_dim[0]), float(str_dim[1]))
         # Obstacles
         num_obstacles = int(f.readline().strip())
         for i in range(0, num_obstacles):
@@ -40,11 +32,31 @@ def create_obstacles(input_file):
                 obstacle.vertices.append((float(str_vertex[0]),float(str_vertex[1])))
             obstacle.original_vertices = copy.deepcopy(obstacle.vertices)
             obstacles.append(obstacle)       
-        
-def main():
-  global obstacles
-  
-  createobstacles("obstacle_map.txt")
 
-  if __name__ == "__main__":
+def read_start_goal(input_file):
+    global start
+    global goal
+    with open(input_file) as f:
+        start_vertex = f.readline().strip().split()
+        start.append(start_vertex[0])
+        start.append(start_vertex[1])
+        goal_vertex = f.readline().strip().split()
+        goal.append(goal_vertex[0])
+        goal.append(goal_vertex[1])
+
+def main():
+    global obstacles
+    global start 
+    global goal
+  
+    create_obstacles(sys.argv[1])
+    read_start_goal(sys.argv[2])
+
+    for i in range(0, len(obstacles)):
+        print( obstacles[i].vertices )
+
+    print( start )
+    print( goal )
+
+if __name__ == "__main__":
     main()
