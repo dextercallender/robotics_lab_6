@@ -11,6 +11,8 @@ dimensions = [600,600]
 step_size = 20.0
 window = None
 start_tree = None
+goal_tree = None
+lab_part = '1'
 
 class Obstacle:
     ''' Represents an obstacle on the map '''
@@ -209,6 +211,12 @@ def draw_inputs():
     red.circle(2)
 
 def generate_random_point(iteration_num):
+    ''' Generate a uniformly random point in the map '''
+    x = random.randint(0, dimensions[0])
+    y = random.randint(0, dimensions[1])
+    return [x, y]
+    
+def generate_random_goal_biased_point(iteration_num):
     '''
         Generate a semi-random point in the map
     '''
@@ -223,10 +231,8 @@ def generate_random_point(iteration_num):
         return [x, y]
     # Remainig iteration, choose uniformly random point
     else:
-        x = random.randint(0, dimensions[0])
-        y = random.randint(0, dimensions[1])
-        return [x, y]
-
+        return generate_random_point(iteration_num)
+    
 def find_closest_node(point, node):
     '''
         Recursively get the closest node to the given point
@@ -243,7 +249,7 @@ def find_closest_node(point, node):
             closest_node = neighbor_closest_node
     return closest_node, closest_dist
 
-def get_new_node_if_valid(random_point, closest_node, line_segs):
+def get_line_seg_if_valid(random_point, closest_node, line_segs):
     '''
         Get the location of the new node, check if it is valid,
         if so, return the new node, otherwise return None
@@ -259,14 +265,7 @@ def get_new_node_if_valid(random_point, closest_node, line_segs):
     for line_seg in line_segs:
         if new_line_seg.intersects(line_seg):
             return None
-    # If the goal is on the line segment of the step, check if the goal
-    # is within reach
-    if random_point == goal or new_line_seg.is_on_line(goal[0], goal[1]):
-        t_to_goal = new_line_seg.solve_t(goal[0], goal[1])
-        # If so, return the goal
-        if t_to_goal <= new_line_seg.t:
-            return Node(goal[0], goal[1])
-    return Node(new_line_seg.x2, new_line_seg.y2)
+    return new_line_seg
 
 def build_tree():
     ''' Build and draw the tree '''
@@ -296,12 +295,20 @@ def build_tree():
                 line_segs.append(line_seg)
     # Start building the tree
     while True:
-        # Get random point
-        random_point = generate_random_point(iteration_num)
+        # Get biased random point
+        random_point = generate_random_goal_biased_point(iteration_num)
         # Get closest node to the random point
         closest_node, closest_dist = find_closest_node(random_point, start_tree)
-        # Get the new node if it doesn't collide with an obstacle
-        new_node = get_new_node_if_valid(random_point, closest_node, line_segs)
+        # Get the new line segment of the tree if it doesn't collide with an obstacle
+        new_line_seg = get_line_seg_if_valid(random_point, closest_node, line_segs)
+        # If the goal is on the line segment of the step, check if the goal
+        # is within reach
+        new_node = Node(new_line_seg.x2, new_line_seg.y2) if new_line_seg else None
+        if new_line_seg and (random_point == goal or new_line_seg.is_on_line(goal[0], goal[1])):
+            t_to_goal = new_line_seg.solve_t(goal[0], goal[1])
+            # If so, return the goal
+            if t_to_goal <= new_line_seg.t:
+                new_node = Node(goal[0], goal[1])
         if new_node:
             # Add the new node to the tree
             new_node.predecessor = closest_node
@@ -317,10 +324,112 @@ def build_tree():
                 return new_node
         iteration_num += 1
 
+def build_two_trees():
+    ''' Build and draw 2 trees '''
+    global start_tree, goal_tree
+    # Turtle graphics
+    orange = Turtle()
+    orange.speed(0)
+    orange.hideturtle()
+    orange.color("orange")
+    orange.penup()
+    green = Turtle()
+    green.speed(0)
+    green.hideturtle()
+    green.color("green")
+    green.penup()
+    # Initialize variables
+    iteration_num = 0
+    start_tree = Node(start[0], start[1])
+    goal_tree = Node(goal[0], goal[1])
+    # Draw first node at start
+    orange.setpos(start[0], start[1])
+    orange.pendown()
+    orange.circle(2)
+    # Draw first node at goal
+    green.setpos(goal[0], goal[1])
+    green.pendown()
+    green.circle(2)
+    line_segs = []
+    # Create a list of the line segments of the objects
+    for j in range(0, len(obstacles)):
+        obstacle = obstacles[j]
+        for i in range(0, len(obstacle.vertices)):
+            # Add the line segment of the current vertex and the next vertex
+            if len(obstacle.vertices) > 1:
+                next_index = (i + 1) % len(obstacle.vertices)
+                line_seg = Line_Segment(obstacle.vertices[i][0], obstacle.vertices[i][1], obstacle.vertices[next_index][0], obstacle.vertices[next_index][1])
+                line_segs.append(line_seg)
+    # Start building the tree
+    while True:
+        print iteration_num
+        # Get random point
+        random_point = generate_random_point(iteration_num)
+        # Get closest node to the random point on the start_tree
+        closest_node1, closest_dist1 = find_closest_node(random_point, start_tree)
+        # Get closest node to the random point on the goal_tree
+        closest_node2, closest_dist2 = find_closest_node(random_point, goal_tree)
+        # Get the new line seg in start_tree if it doesn't collide with an obstacle
+        new_line_seg1 = get_line_seg_if_valid(random_point, closest_node1, line_segs)
+        # Get the new line seg in goal_tree if it doesn't collide with an obstacle
+        new_line_seg2 = get_line_seg_if_valid(random_point, closest_node2, line_segs)
+        # Check if the random_point is within reach from both trees
+        new_node1 = Node(new_line_seg1.x2, new_line_seg1.y2) if new_line_seg1 else None
+        new_node2 = Node(new_line_seg2.x2, new_line_seg2.y2) if new_line_seg2 else None 
+        new_node = None
+        if new_line_seg1 and new_line_seg2:
+            t_to_goal1 = new_line_seg1.solve_t(random_point[0], random_point[1])
+            t_to_goal2 = new_line_seg2.solve_t(random_point[0], random_point[1])
+            # If so, set the nodes to the random point
+            if t_to_goal1 <= new_line_seg1.t and t_to_goal2 <= new_line_seg2.t:
+                new_node1 = Node(random_point[0], random_point[1])
+                new_node2 = Node(random_point[0], random_point[1])                
+        if new_node1:
+            # Add the new node to the start_tree
+            new_node1.predecessor = closest_node1
+            closest_node1.neighbors.append(new_node1)
+            # Draw line from predecessor to new node
+            orange.setpos(closest_node1.x, closest_node1.y)
+            orange.pendown()
+            orange.setpos(new_node1.x, new_node1.y)
+            orange.circle(2)
+            orange.penup()
+        if new_node2:
+            # Add new node to the goal_tree
+            new_node2.predecessor = closest_node2
+            closest_node2.neighbors.append(new_node2)
+            # Draw line from predecessor to new node
+            green.setpos(closest_node2.x, closest_node2.y)
+            green.pendown()
+            green.setpos(new_node2.x, new_node2.y)
+            green.circle(2)
+            green.penup()
+        # If new_nodes are the same, stop
+        if new_node1 and new_node2 and new_node1.x == new_node2.x and new_node1.y == new_node2.y:
+                return new_node1, new_node2
+        iteration_num += 1
+
 def get_shortest_path(goal):
     ''' Get the shortest path to the goal from the tree '''
     path = []
     node = goal
+    while node:
+        path.append(node)
+        node = node.predecessor
+    path.reverse()
+    return path
+
+def get_shortest_2_tree_path(start_middle, goal_middle):
+    ''' Get the shortest path from the middle nodes of both trees '''
+    path = []
+    node = start_middle
+    # Traverse through nodes of start_tree
+    while node:
+        path.append(node)
+        node = node.predecessor
+    path.reverse()
+    node = goal_middle.predecessor
+    # Traverse through nodes of goal_tree
     while node:
         path.append(node)
         node = node.predecessor
@@ -338,25 +447,35 @@ def draw_path(path):
         blue.pendown()
     
 def main():
-    global obstacles, start, goal, window, step_size
+    global obstacles, start, goal, window, step_size, lab_part
 
-    if len(sys.argv) < 4:
-        print 'Usage: python lab6.py [obstacle file] [start/goal file] [step_size]'
+    if len(sys.argv) < 5:
+        print 'Usage: python lab6.py [obstacle file] [start/goal file] [step_size] [lab_part (1,2,e)]'
         return
 
     # Parse inputs    
     create_obstacles(sys.argv[1])
     read_start_goal(sys.argv[2])
     step_size = float(sys.argv[3])
-
+    lab_part = sys.argv[4]
+    
     # Draw inputs
     draw_inputs()
 
+    goal_node = None
+    start_middle_node = None
+    goal_middle_node = None
     # Build tree
-    goal = build_tree()
-
+    if lab_part == '1':
+        goal_node = build_tree()
+    elif lab_part == '2':
+        start_middle_node, goal_middle_node = build_two_trees()
+        
     # Get shortest path
-    path = get_shortest_path(goal)
+    if lab_part == '1':
+        path = get_shortest_path(goal_node)
+    elif lab_part == '2':
+        path = get_shortest_2_tree_path(start_middle_node, goal_middle_node)
 
     # Draw path
     draw_path(path)
