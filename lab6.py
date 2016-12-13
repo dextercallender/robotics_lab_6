@@ -278,7 +278,12 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
     # Get line segment for this step    
     new_line_seg = Line_Segment(closest_node.x, closest_node.y, random_point[0], random_point[1])
     new_line_seg.modify_to_step_size()
-    print( new_line_seg.angle_from_x_axis() )
+    angle = new_line_seg.angle_from_x_axis()
+    x_move = 20 * math.sin(angle)
+    y_move = 20 * math.cos(angle)
+    print( angle )
+    print( x_move )
+    print( y_move )
     sys.exit(0)
 
     #new_line_seg1 = Line_Segment()
