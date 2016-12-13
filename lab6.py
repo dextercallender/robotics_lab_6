@@ -30,6 +30,8 @@ class Node:
     
     def __init__(self, param_x, param_y):
         ''' Initializes a node at location param_x, param_y '''
+        self.x_prev
+        self.y_prev
         self.x = param_x
         self.y = param_y
         self.predecessor = None
