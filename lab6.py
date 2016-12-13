@@ -281,8 +281,8 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
 
     # calculate angle and offset distance
     angle = new_line_seg.angle_from_x_axis()
-    x_move = 20 * math.sin(angle)
-    y_move = 20 * math.cos(angle)
+    x_move = 10 * math.sin(angle)
+    y_move = 10 * math.cos(angle)
     print( angle )
     print( x_move )
     print( y_move )
@@ -308,8 +308,12 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
     #new_line_seg1 = Line_Segment()
     #new_line_seg1 = Line_Segment()
     # Make sure the point is within bounds
-    if new_line_seg.x2 < 0 or new_line_seg.x2 > dimensions[0] \
-       or new_line_seg.y2 < 0 or new_line_seg.y2 > dimensions[0]:
+    if new_line_seg1.x2 < 0 or new_line_seg1.x2 > dimensions[0] \
+        or new_line_seg1.y2 < 0 or new_line_seg1.y2 > dimensions[0] \
+        or new_line_seg2.x2 < 0 or new_line_seg2.x2 > dimensions[0] \
+        or new_line_seg2.y2 < 0 or new_line_seg2.y2 > dimensions[0] \
+        or new_line_seg.x2 < 0 or new_line_seg.x2 > dimensions[0] \
+        or new_line_seg.y2 < 0 or new_line_seg.y2 > dimensions[0]:
         return None
     # Make sure it doesn't intersect any obstacles
     for line_seg in line_segs:
