@@ -303,7 +303,7 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
     new_line_seg2.y1 -= y_move
     new_line_seg2.y2 -= y_move
 
-    sys.exit(0)
+    #sys.exit(0)
 
     #new_line_seg1 = Line_Segment()
     #new_line_seg1 = Line_Segment()
@@ -313,7 +313,8 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
         return None
     # Make sure it doesn't intersect any obstacles
     for line_seg in line_segs:
-        if new_line_seg.intersects(line_seg):
+        if new_line_seg1.intersects(line_seg) or new_line_seg2.intersects(line_seg) \
+            or new_line_seg.intersects(line_seg):
             return None
     return new_line_seg
 
