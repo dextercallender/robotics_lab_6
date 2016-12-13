@@ -278,12 +278,31 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
     # Get line segment for this step    
     new_line_seg = Line_Segment(closest_node.x, closest_node.y, random_point[0], random_point[1])
     new_line_seg.modify_to_step_size()
+
+    # calculate angle and offset distance
     angle = new_line_seg.angle_from_x_axis()
     x_move = 20 * math.sin(angle)
     y_move = 20 * math.cos(angle)
     print( angle )
     print( x_move )
     print( y_move )
+
+
+    # create offset line segments for robot width
+    new_line_seg1 = Line_Segment(closest_node.x, closest_node.y, random_point[0], random_point[1])
+    new_line_seg1.modify_to_step_size()
+    new_line_seg1.x1 += x_move
+    new_line_seg1.x2 += x_move
+    new_line_seg1.y1 += y_move
+    new_line_seg1.y2 += y_move
+
+    new_line_seg2 = Line_Segment(closest_node.x, closest_node.y, random_point[0], random_point[1])
+    new_line_seg2.modify_to_step_size()
+    new_line_seg2.x1 -= x_move
+    new_line_seg2.x2 -= x_move
+    new_line_seg2.y1 -= y_move
+    new_line_seg2.y2 -= y_move
+
     sys.exit(0)
 
     #new_line_seg1 = Line_Segment()
