@@ -145,7 +145,7 @@ class Line_Segment:
         self.t = self.solve_t(self.x2, self.y2)        
 
     def angle_from_x_axis(self):
-        return math.atan( self.y2-self.y1, self.x2 - self.x1 )
+        return math.atan2( self.y2-self.y1, self.x2 - self.x1 )
 
 def create_obstacles(input_file):
     ''' Create the obstacles and world dimensions from the specified input file '''
@@ -279,7 +279,7 @@ def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
     new_line_seg = Line_Segment(closest_node.x, closest_node.y, random_point[0], random_point[1])
     new_line_seg.modify_to_step_size()
     print( new_line_seg.angle_from_x_axis() )
-    exit()
+    sys.exit(0)
 
     #new_line_seg1 = Line_Segment()
     #new_line_seg1 = Line_Segment()
@@ -325,8 +325,13 @@ def build_tree():
         random_point = generate_random_goal_biased_point(iteration_num)
         # Get closest node to the random point
         closest_node, closest_dist = find_closest_node(random_point, start_tree)
+        
         # Get the new line segment of the tree if it doesn't collide with an obstacle
-        new_line_seg = get_line_seg_if_valid(random_point, closest_node, line_segs)
+        #new_line_seg = get_line_seg_if_valid(random_point, closest_node, line_segs)
+        
+        # Extra credit function
+        new_line_seg = get_line_seg_if_valid_ec(random_point, closest_node, line_segs)
+        
         # If the goal is on the line segment of the step, check if the goal
         # is within reach
         new_node = Node(new_line_seg.x2, new_line_seg.y2) if new_line_seg else None
