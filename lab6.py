@@ -143,7 +143,10 @@ class Line_Segment:
         self.x2 = self.x1 + (self.delta_x * step_size)
         self.y2 = self.y1 + (self.delta_y * step_size)
         self.t = self.solve_t(self.x2, self.y2)        
-                            
+
+    def angle_from_x_axis(self):
+        return math.atan( self.y2-self.y1, self.x2 - self.x1 )
+
 def create_obstacles(input_file):
     ''' Create the obstacles and world dimensions from the specified input file '''
     global obstacles
@@ -269,14 +272,17 @@ def get_line_seg_if_valid(random_point, closest_node, line_segs):
     return new_line_seg
 
 def get_line_seg_if_valid_ec( random_point, closest_node, line_segs ):
-     '''
-     Extra Credit Version
-     '''
-    # Get line segment for this step
+    '''
+    Extra Credit Version
+    '''
+    # Get line segment for this step    
     new_line_seg = Line_Segment(closest_node.x, closest_node.y, random_point[0], random_point[1])
     new_line_seg.modify_to_step_size()
-    new_line_seg1 = Line_Segment()
-    new_line_seg1 = Line_Segment()
+    print( new_line_seg.angle_from_x_axis() )
+    exit()
+
+    #new_line_seg1 = Line_Segment()
+    #new_line_seg1 = Line_Segment()
     # Make sure the point is within bounds
     if new_line_seg.x2 < 0 or new_line_seg.x2 > dimensions[0] \
        or new_line_seg.y2 < 0 or new_line_seg.y2 > dimensions[0]:
