@@ -34,6 +34,7 @@ class Node:
         self.y = param_y
         self.predecessor = None
         self.neighbors = []
+        self.angle = 0 #odometry for node
 
     def dist_to_point(self, point):
         ''' Get euclidean distance from this node to the given point '''
